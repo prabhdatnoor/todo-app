@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/models"
 	"strings"
 	"time"
 
@@ -8,28 +9,12 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
-	"github.com/gofiber/fiber/v2/middleware/favicon"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 )
-
-type User struct {
-	gorm.Model
-	id       uint   `gorm:"primaryKey;autoIncrement:true"`
-	username string `gorm:"unique"`
-}
-type Task struct {
-	gorm.Model
-	id          uint `gorm:"primaryKey;autoIncrement:true"`
-	assignee    User
-	description string
-	name        string
-	createdTime int64 `gorm:"serializer:unixtime;type:time"`
-	status      string
-}
 
 //type DBINFO struct {
 //	port     uint64
@@ -61,14 +46,24 @@ func main() {
 		panic("failed to connect database")
 	}
 	// Migrate the schema
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Task{})
+
+	if db.AutoMigrate(&models.User{}) != nil {
+		fmt.Print("failed to migrate users")
+	}
+	if db.AutoMigrate(&models.Task{}) != nil {
+		fmt.Print("failed to migrate tasks")
+	}
 
 	// Create
-	db.Create(&User{username: "communi"})
-	var user User
+	db.Create(&models.User{Username: "carmenwinstead"})
+	var user models.User
 
-	db.First(&user, "username = ?", "communi")
+	db.First(&user, "Username = ?", "communi")
+	//fmt.Print(user)
+	db.First(&user, "Username = ?", "carmenwinstead")
+	//fmt.Print(user)
+
+	db.Create(&models.Task{Assignee: user.Id, Name: "what da dog doin?", Status: "not started", Description: "hello there, quandale dingle here"})
 
 	app := fiber.New()
 	app.Use(logger.New(logger.Config{
@@ -123,5 +118,7 @@ func main() {
 		return c.SendFile(os.Getenv("LOC") + "./bruh.png")
 	})
 
-	app.Listen(":" + os.Getenv("PORT"))
+	if app.Listen(":"+os.Getenv("PORT")) != nil {
+		fmt.Print("app listening ERROR!")
+	}
 }
