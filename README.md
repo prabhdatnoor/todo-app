@@ -1,6 +1,9 @@
 # todo-app
 
-to run:
+
+1. Make sure you have `git` and `docker` installed.
+
+2. Run:
 
 ```
 git clone https://github.com/prabhdatnoor/todo-app/
