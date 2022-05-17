@@ -1,5 +1,5 @@
 # todo-app
-
+Todo-app written mainly in Golang. PostgreSQL is used for all storage except sessions, which we use Redis for. 
 
 1. Make sure you have `git` and `docker` installed.
 
