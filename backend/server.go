@@ -2,6 +2,8 @@ package main
 
 import (
 	"backend/models"
+	"github.com/gofiber/fiber/v2/middleware/basicauth"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -10,6 +12,7 @@ import (
 	"os"
 
 	"encoding/json"
+	"github.com/alexedwards/argon2id"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -27,9 +30,31 @@ import (
 //}
 
 func checkAuth(db *gorm.DB, uname string, taskID uint, role rune) bool {
+
 	return true
 }
 
+func verifyUser(db *gorm.DB, uname, password string) (bool, error) {
+	var passhash string
+	//fmt.Print(uname, password)
+	var user models.User
+	err := db.Model(&user).Select("password").Where("username = ?", uname).Find(&passhash).Error
+	if err != nil {
+		fmt.Print(err)
+		//fiber.NewError(401)
+		return false, err
+	}
+
+	//fmt.Print(passhash)
+
+	match, erro := argon2id.ComparePasswordAndHash(password, passhash)
+	if erro != nil {
+		fmt.Print(erro)
+		return false, erro
+	}
+
+	return match, nil
+}
 func main() {
 	fmt.Print(os.Getenv("POSTGRES_PASSWORD_FILE"))
 	dat, err := os.ReadFile(os.Getenv("POSTGRES_PASSWORD_FILE"))
@@ -118,6 +143,67 @@ func main() {
 
 		//return c.SendString("Where is john?")
 	})*/
+
+	app.Post("/auth", basicauth.New(basicauth.Config{
+		Realm: "Forbidden",
+		Authorizer: func(userID, pass string) bool {
+			fmt.Print(userID, pass)
+			match, err := verifyUser(db, userID, pass)
+			if err != nil {
+				log.Fatal(err)
+				return false
+			}
+			return match
+		},
+		ContextUsername: "_user",
+		ContextPassword: "_pass",
+	}))
+
+	app.Post("auth/login", func(c *fiber.Ctx) error {
+		if err := c.BodyParser(&user); err != nil {
+			fmt.Print(err)
+			return fiber.NewError(500)
+		}
+
+		match, err := verifyUser(db, user.Username, user.Password)
+		if err != nil {
+			log.Fatal(err)
+			return fiber.NewError(403)
+		}
+		if match == true {
+			return c.SendStatus(200)
+		}
+
+		return c.SendStatus(403)
+
+	})
+	app.Post("auth/register", func(c *fiber.Ctx) error {
+		if err := c.BodyParser(&user); err != nil {
+			fmt.Print(err)
+			return fiber.NewError(500)
+		}
+
+		//salt, err := utils.GenSalt(16);
+
+		if err != nil {
+			fmt.Print(err)
+			return fiber.NewError(500)
+		}
+		///hash := argon2.Key([]byte("some password"), salt, 3, 32*1024, 4, 32)
+		hash, err := argon2id.CreateHash(user.Password, argon2id.DefaultParams)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		user.Password = string(hash)
+
+		if erro := db.Create(&user); err != nil {
+			fmt.Print(erro)
+			return fiber.NewError(500)
+		}
+
+		return c.SendStatus(200)
+	})
 
 	app.Get("/users/info/:username", func(c *fiber.Ctx) error {
 		if c.Params("username") == "" {
