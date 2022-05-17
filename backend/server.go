@@ -95,10 +95,7 @@ func main() {
 
 	db.First(&user, "Username = ?", "communi")
 	//fmt.Print(user)
-	db.First(&user, "Username = ?", "carmenwinstead")
 	//fmt.Print(user)
-
-	//db.Create(&models.Task{Assignee: user.ID, Name: "what da dog doin?", Status: "not started", Description: "hello there, quandale dingle here"})
 
 	app := fiber.New()
 	app.Use(logger.New(logger.Config{
