@@ -55,6 +55,7 @@ func verifyUser(db *gorm.DB, uname, password string) (bool, error) {
 
 	return match, nil
 }
+
 func main() {
 	fmt.Print(os.Getenv("POSTGRES_PASSWORD_FILE"))
 	dat, err := os.ReadFile(os.Getenv("POSTGRES_PASSWORD_FILE"))
@@ -175,8 +176,40 @@ func main() {
 		}
 
 		return c.SendStatus(403)
+  })
+	app.Get("/users/info/:username", func(c *fiber.Ctx) error {
+		if c.Params("username") == "" {
+			fmt.Print(err)
+			return fiber.NewError(400, "No userID provided!")
+		}
 
+		err := db.First(&user, "Username = ?", c.Params("username"))
+		if err != nil {
+			fmt.Print(err)
+			return fiber.NewError(400, "error in finding user")
+		}
+
+		err = db.Select("Id").Limit(-1).Find(&tasks, "Username = ?", c.Params("username"))
+		if err != nil {
+			fmt.Print(err)
+			return fiber.NewError(400, "error in finding user in tasks table")
+		}
+		fmt.Print("bruh")
+
+		data := map[string]interface{}{
+			"pfp":   user.Pfp,
+			"tasks": tasks,
+			"id":    user.ID,
+		}
+
+		out, erro := json.Marshal(data)
+		if erro != nil {
+			fmt.Print(erro)
+			return fiber.NewError(500, "error in stringifying")
+		}
+		return c.SendString(string(out))
 	})
+  
 	app.Post("auth/register", func(c *fiber.Ctx) error {
 		if err := c.BodyParser(&user); err != nil {
 			fmt.Print(err)
