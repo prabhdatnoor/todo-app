@@ -3,6 +3,7 @@ module backend
 go 1.18
 
 require (
+	github.com/alexedwards/argon2id v0.0.0-20211130144151-3585854a6387 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/gofiber/fiber/v2 v2.33.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect

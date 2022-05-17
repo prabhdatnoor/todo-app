@@ -2,13 +2,18 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 type User struct {
 	gorm.Model
-	Username string `gorm:"unique"`
-	Pfp      string
+	Username  string `gorm:"unique"`
+	Pfp       string
+	Password  string
+	Role      rune
+	LastLogin time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 }
+
 type Task struct {
 	gorm.Model
 	Assignee    uint `gorm:"foreignKey:users_Username"`
