@@ -9,6 +9,7 @@ import (
 
 var (
 	Def_passhash string = "$argon2id$v=19$m=65536,t=1,p=2$tlc5gPMfmKK5HRToLjpxCA$Pq0RBqRoZJdL07r/wpQnwWY91nK1zrjxIkOF8aB005g"
+	//output of argon2id.CreateHash("guest", argon2id.DefaultParams)
 )
 
 func CheckAuth(db *gorm.DB, uname string, taskID uint, role rune) bool {
