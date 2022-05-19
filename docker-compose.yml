@@ -1,17 +1,19 @@
 version: "3.7"
 
 services:
-  backend:
+  todo:
     build:
-      context: backend
-    command: go run server.go
+      context: .
+    command: go run main.go
     environment:
       - DATABASE_DB=postgres
       - DATABASE_USER=postgres
       - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
       - DATABASE_HOST=db
       - DATABASE_PORT=5432
-      - ROOT_PATH="/backend"
+      - REDIS_HOST=redis
+      - ROOT_PATH="/"
+      - PORT=5001
     ports:
       - 5001:5001
       - 9229:9229
@@ -19,8 +21,12 @@ services:
     secrets:
       - db_password
     volumes:
-      - ./backend:/code:ro
-      - ../pfps/:/pfps
+      - ./app:/app:ro
+      - ./routes:/routes:ro
+      - ./main.go:/main.go:ro
+      - ./go.mod:/go.mod:ro
+      - ./go.sum:/go.sum:ro
+      - ./static:/static:ro
     networks:
       - public
       - private
@@ -50,25 +56,6 @@ services:
     ports:
       - "6379:6379"
 
-
-  # frontend:
-  #   build:
-  #     args:
-  #       - NODE_ENV=development
-  #     context: frontend
-  #     target: development
-  #   environment:
-  #     - NODE_ENV=development
-  #   ports:
-  #     - 8080:3000
-  #   volumes:
-  #     - ./frontend/src:/code/src
-  #     - /code/node_modules
-  #   networks:
-  #     - public
-  #   depends_on:
-  #     - backend
-
 networks:
   public:
   private:
@@ -76,4 +63,4 @@ volumes:
   db-data:
 secrets:
   db_password:
-    file: db/password.txt
+    file: password.txt
