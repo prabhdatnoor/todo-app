@@ -37,14 +37,14 @@ func main() {
 
 	// Or extend your config for customization
 	app.Use(favicon.New(favicon.Config{
-		File: "app/favicon.ico",
+		File: "static/public/favicon.ico",
 	}))
 
 	// Or extend your config for customization
 	limiterConfig := limiter.Config{
 		Max: 20, // max count of connections
 		LimitReached: func(c *fiber.Ctx) error {
-			return c.SendFile("app/toofast.html") // called when a request hits the limit
+			return c.SendFile("static/public/toofast.html") // called when a request hits the limit
 		},
 	}
 
@@ -93,10 +93,10 @@ func main() {
 			return c.SendStatus(500)
 		}
 
-		if err != nil {
-			fmt.Print(err)
-			return c.SendStatus(500)
+		if user.Password == "guest" {
+			return c.Status(fiber.StatusBadRequest).SendString(`Can't use "guest" as password`)
 		}
+
 		hash, err := argon2id.CreateHash(user.Password, argon2id.DefaultParams)
 		if err != nil {
 			fmt.Print(err)
