@@ -1,2 +1,6 @@
-/db/password.txt
+/password.txt
 /dbata/
+/.idea/
+/redis/
+/static/pfps/
+.DS_Store
