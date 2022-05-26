@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 	"main/app/models"
 	"os"
-	"strings"
 )
 
 var (
@@ -15,17 +14,16 @@ var (
 
 func ConnectDB() (*gorm.DB, error) {
 
-	fmt.Print(os.Getenv("POSTGRES_PASSWORD_FILE"))
+	/*fmt.Print(os.Getenv("POSTGRES_PASSWORD_FILE"))
 	dat, err := os.ReadFile(os.Getenv("POSTGRES_PASSWORD_FILE"))
 	if err != nil {
-		panic("failed to read password file")
-	}
+		panic("failed to read password file")*/
 
-	port := "port=5432"
+	port := "port=" + os.Getenv("DATABASE_PORT")
 	host := "host=" + os.Getenv("DATABASE_HOST")
 	userq := "user=" + os.Getenv("DATABASE_USER")
-	password := "password=" + strings.TrimSuffix(string(dat), "\n")
-	password = "password=postgres"
+	//password := "password=" + strings.TrimSuffix(string(dat), "\n")
+	password := "password=postgres"
 	name := "database=" + os.Getenv("DATABASE_DB")
 
 	dsn := port + " " + host + " " + userq + " " + password + " " + name + " sslmode=disable TimeZone=America/New_York"

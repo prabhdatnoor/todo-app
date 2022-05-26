@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"main/app/auth"
 	"main/app/database"
 	"main/app/models"
 	"strconv"
@@ -11,15 +12,15 @@ import (
 func CreateTask(c *fiber.Ctx) error {
 	var task models.Task
 	//Create
-	headers := c.GetReqHeaders()
-
-	if !CheckAuth(database.Db, headers["username"], 12, 'r') {
-		return c.SendStatus(401)
-	}
 
 	if err := c.BodyParser(&task); err != nil {
 		fmt.Print(err)
 		return c.SendStatus(500)
+	}
+
+	goodCreds, err := auth.CheckAuth(c, task.ID, 'r')
+	if err != nil || !goodCreds {
+		return c.SendStatus(401)
 	}
 
 	//stmt := database.Db.Session(&gorm.Session{DryRun: true}).Create(&task).Statement.SQL.String()
@@ -33,10 +34,6 @@ func CreateTask(c *fiber.Ctx) error {
 func GetTask(c *fiber.Ctx) error {
 	//READ
 	var tasks []models.Task
-	headers := c.GetReqHeaders()
-	if !CheckAuth(database.Db, headers["username"], 12, 'r') {
-		return c.SendStatus(401)
-	}
 
 	//var payload models.User
 
@@ -44,6 +41,12 @@ func GetTask(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.SendStatus(400)
+	}
+
+	goodCreds, err := auth.CheckAuth(c, uint(id), 'r')
+	if err != nil || !goodCreds {
+		fmt.Print(err)
+		return c.SendStatus(401)
 	}
 
 	var count int64
@@ -66,14 +69,13 @@ func GetTask(c *fiber.Ctx) error {
 func PatchTask(c *fiber.Ctx) error {
 	//UPDATE
 	var task models.Task
-	headers := c.GetReqHeaders()
-
-	if !CheckAuth(database.Db, headers["username"], 12, 'r') {
-		return c.SendStatus(401)
-	}
 
 	if err := c.BodyParser(&task); err != nil {
 		return c.SendStatus(500)
+	}
+	goodCreds, err := auth.CheckAuth(c, task.ID, 'w')
+	if err != nil || !goodCreds {
+		return c.SendStatus(401)
 	}
 
 	if err := database.Db.Model(&task).Updates(&task).Error; err != nil {
@@ -87,17 +89,17 @@ func PatchTask(c *fiber.Ctx) error {
 func DeleteTask(c *fiber.Ctx) error {
 	//delete
 	var task models.Task
-	headers := c.GetReqHeaders()
-
-	if !CheckAuth(database.Db, headers["username"], 12, 'w') {
-		return c.SendStatus(401)
-	}
 
 	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
 
 	if err != nil {
 		fmt.Print(err)
 		return c.SendStatus(400)
+	}
+
+	goodCreds, err := auth.CheckAuth(c, uint(id), 'r')
+	if err != nil || !goodCreds {
+		return c.SendStatus(401)
 	}
 
 	if err := database.Db.Where("id = ?", id).Delete(&task); err != nil {
