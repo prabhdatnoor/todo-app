@@ -1,0 +1,7 @@
+#holder {
+    !important padding: 25px 50px 75px 100px;
+}
+
+#login-status{
+    display: none;
+}
