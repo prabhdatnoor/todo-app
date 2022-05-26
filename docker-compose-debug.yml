@@ -1,0 +1,73 @@
+version: "3"
+
+services:
+  todo:
+    build:
+      context: ./Dockerfile-debug
+    environment:
+      - DATABASE_DB=postgres
+      - DATABASE_USER=postgres
+      #- POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ROOT_PATH="/"
+      - PORT=5001
+    ports:
+      - 5001:5001
+      - 9229:9229
+      - 9230:9230
+      - 40000:40000
+      - 8000:8000
+      - 2345:2345
+   # secrets:
+   #   - db_password
+    volumes:
+      - ./app:/app:ro
+      - ./routes:/routes:ro
+      - ./main.go:/main.go:ro
+      - ./go.mod:/go.mod:ro
+      - ./go.sum:/go.sum:ro
+      - ./static:/static:ro
+    networks:
+      - public
+      - private
+    depends_on:
+      - db
+      - redis
+    security_opt:
+      - "seccomp:unconfined"
+  db:
+    image: postgres:latest
+    volumes:
+      - ./dbata/:/var/lib/postgresql/data
+    #     - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+#    ports:
+#      - "5438:5432"
+    #secrets:
+   #   - db_password
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      #- POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+    networks:
+      - private
+
+  redis:
+    image: redis:latest
+    networks:
+      - private
+#    volumes:
+#      - ./redis:/data
+#    ports:
+#      - "6379:6379"
+
+networks:
+  public:
+  private:
+volumes:
+  db-data:
+#secrets:
+ # db_password:
+  #  file: db-password.txt
