@@ -1,24 +1,38 @@
-FROM golang:alpine3.15 as debug
+FROM golang:alpine as base
 
-# installing git
-RUN apk update && apk upgrade && \
-    apk add --no-cache git \
-        dpkg \
-        gcc \
-        git \
-        musl-dev
+WORKDIR /app
 
-ENV GOPATH /go
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+# System dependencies
+RUN apk update \
+    && apk add --no-cache \
+    build-base \
+    ca-certificates \
+    git npm \
+    && update-ca-certificates
 
-RUN go get github.com/go-delve/delve/cmd/dlv
+### Development with hot reload and debugger
+FROM base AS dev
+WORKDIR /app
 
-WORKDIR /
+COPY go.mod /app
+COPY .air.toml /app
+# Hot reloading mod
+RUN go get -u github.com/cosmtrek/air && go install github.com/go-delve/delve/cmd/dlv@latest
+EXPOSE 2345 3000
+RUN go install github.com/cosmtrek/air@latest
 
-RUN go build -o app
-### Run the Delve debugger ###
-COPY ./dlv.sh /
-RUN chmod +x /dlv.sh
-ENTRYPOINT [ "/dlv.sh"]
 
-###########START NEW IMAGE###################
+### Executable builder
+FROM base AS builder
+WORKDIR /app
+
+# Application dependencies
+COPY . /app
+RUN go mod download \
+    && go mod verify
+
+RUN go build -ldflags "-X main.Version=`git tag --sort=-version:refname | head -n 1` -X main.BuildDate=`date -u +\"%Y-%m-%dT%H:%M:%SZ\"` -X main.GitCommit=`git rev-parse --short HEAD` -X main.GitBranch=`git rev-parse --abbrev-ref HEAD` -X main.GitSummary=`git describe --tags --dirty --always` -X main.GitState=`./git-status.sh`" -o maintainer -a .
+
+
+
+

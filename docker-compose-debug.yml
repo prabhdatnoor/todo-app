@@ -1,9 +1,12 @@
-version: "3"
+version: "3.9"
 
 services:
   todo:
+    command: ["air", "-c", ".air.toml"]
     build:
-      context: ./Dockerfile-debug
+      context: .
+      target: dev
+      dockerfile: ./Dockerfile-debug
     environment:
       - DATABASE_DB=postgres
       - DATABASE_USER=postgres
@@ -12,7 +15,7 @@ services:
       - DATABASE_PORT=5432
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - ROOT_PATH="/"
+      - ROOT_PATH="/app"
       - PORT=5001
     ports:
       - 5001:5001
@@ -24,12 +27,12 @@ services:
    # secrets:
    #   - db_password
     volumes:
-      - ./app:/app:ro
-      - ./routes:/routes:ro
-      - ./main.go:/main.go:ro
-      - ./go.mod:/go.mod:ro
-      - ./go.sum:/go.sum:ro
-      - ./static:/static:ro
+      - ./app:/app/app:ro
+      - ./routes:/app/routes:ro
+      - ./main.go:/app/main.go:ro
+      - ./go.mod:/app/go.mod:ro
+      - ./go.sum:/app/go.sum:ro
+      - ./static:/app/static:ro
     networks:
       - public
       - private
