@@ -107,6 +107,14 @@ func main() {
 
 	app.Static("/", "./static/public")
 
+	app.Get("/home", func(c *fiber.Ctx) error {
+		deets, err := auth.VerifySess(c)
+		if deets.Username != "guest" || err == nil {
+			return c.SendFile("./static/home.html")
+		}
+		return c.SendFile("./static/public/forbidden.html")
+	})
+
 	if app.Listen(":"+os.Getenv("PORT")) != nil {
 		fmt.Print("app listening ERROR!")
 	}
