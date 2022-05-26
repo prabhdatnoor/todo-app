@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/basicauth"
+	"main/app/auth"
+	. "main/app/cache"
 	"main/app/controllers"
-	. "main/app/controllers"
 	. "main/app/database"
 	"time"
 
@@ -13,7 +13,6 @@ import (
 	"os"
 
 	"encoding/json"
-	"github.com/alexedwards/argon2id"
 	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -23,10 +22,15 @@ func main() {
 	var err error
 	Db, err = ConnectDB()
 	if err != nil {
+		fmt.Print(err)
 		panic("can't connect to Db")
 	}
-	var user models.User
-	var tasks []models.Task
+
+	Store, err = ConnectStore()
+	if err != nil {
+		fmt.Print(err)
+		panic("can't connect to Redis")
+	}
 
 	app := fiber.New()
 	app.Use(logger.New(logger.Config{
@@ -57,63 +61,15 @@ func main() {
 		return c.SendString("Hello, World!")
 	})
 
-	app.Post("/auth", basicauth.New(basicauth.Config{
-		Realm: "Forbidden",
-		Authorizer: func(userID, pass string) bool {
-			match, err := VerifyUser(Db, userID, pass)
-			if err != nil {
-				return false
-			}
-			return match
-		},
-		ContextUsername: "_user",
-		ContextPassword: "_pass",
-	}))
-
-	app.Post("auth/login", func(c *fiber.Ctx) error {
-		if err := c.BodyParser(&user); err != nil {
-			fmt.Print(err)
-			return c.SendStatus(500)
-		}
-
-		match, err := VerifyUser(Db, user.Username, user.Password)
-		if err != nil {
-			return c.SendStatus(403)
-		}
-		if match == true {
-			return c.SendStatus(200)
-		}
-
-		return c.SendStatus(403)
-	})
-
-	app.Post("auth/register", func(c *fiber.Ctx) error {
-		if err := c.BodyParser(&user); err != nil {
-			fmt.Print(err)
-			return c.SendStatus(500)
-		}
-
-		if user.Password == "guest" {
-			return c.Status(fiber.StatusBadRequest).SendString(`Can't use "guest" as password`)
-		}
-
-		hash, err := argon2id.CreateHash(user.Password, argon2id.DefaultParams)
-		if err != nil {
-			fmt.Print(err)
-			return c.SendStatus(500)
-		}
-
-		user.Password = string(hash)
-
-		if erro := Db.Create(&user); err != nil {
-			fmt.Print(erro)
-			return c.SendStatus(500)
-		}
-
-		return c.SendStatus(200)
-	})
+	app.Post("/logout", auth.Logout)
+	app.Post("/login", auth.Login)
+	app.Post("/register", auth.Register)
+	//app.Post("/verifySess", auth.VerifySessf)
 
 	app.Get("/users/info/:username", func(c *fiber.Ctx) error {
+		var user models.User
+		var tasks []models.Task
+
 		if c.Params("username") == "" {
 			fmt.Print(err)
 			return c.Status(400).SendString("No userID provided!")

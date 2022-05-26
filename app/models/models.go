@@ -10,7 +10,7 @@ type User struct {
 	Username  string `gorm:"unique"`
 	Pfp       string
 	Password  string
-	Role      rune
+	IsAdmin   bool      `gorm:"default:false"`
 	LastLogin time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 }
 
@@ -34,4 +34,10 @@ type Search struct {
 	/*DeletedAt   gorm.DeletedAt `gorm:"index"`
 	Description string
 	Name        string*/
+}
+
+type StoreVal struct {
+	IsAdmin  bool
+	Username string
+	ID       uint
 }
