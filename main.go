@@ -57,10 +57,6 @@ func main() {
 		//for some reason, it doesnt want to use it
 	)
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
-
 	app.Post("/logout", auth.Logout)
 	app.Post("/login", auth.Login)
 	app.Post("/register", auth.Register)
@@ -108,6 +104,8 @@ func main() {
 	app.Patch("/tasks", controllers.PatchTask)
 
 	app.Delete("/tasks", controllers.DeleteTask)
+
+	app.Static("/", "./static/public")
 
 	if app.Listen(":"+os.Getenv("PORT")) != nil {
 		fmt.Print("app listening ERROR!")
