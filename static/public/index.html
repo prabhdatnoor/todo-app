@@ -60,19 +60,21 @@
 
     async function Login(){
         try{
+            const Password = document.getElementById('password').value;
+            const Username = document.getElementById('username').value;
             const response = await fetch("/login", {
                 method:'POST',
                 headers: {
                     'Content-Type':'application/json'
                 },
-                body: {
-                    Password: document.getElementById('password').textContent,
-                    Username: document.getElementById('username').textContent,
-                }
+                body: JSON.stringify({
+                    Password,
+                    Username
+                })
 
             });
 
-            const json = response.json();
+            const json = await response.json();
 
             if (json["success"] === true){
                 document.getElementById("login-status").style.display = "none"
