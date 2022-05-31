@@ -134,6 +134,7 @@ func Login(c *fiber.Ctx) error {
 				"User": fiber.Map{
 					"username": goodCreds.Username,
 					"id":       goodCreds.ID,
+					"pfp":      goodCreds.Pfp,
 				},
 				"success": true,
 				"message": "Content de te revoir, " + goodCreds.Username + "!",
@@ -178,6 +179,7 @@ func Login(c *fiber.Ctx) error {
 		"User": fiber.Map{
 			"username": user.Username,
 			"id":       id,
+			"pfp":      user.Pfp,
 		},
 		"success": true,
 		"message": "Bienvenue, " + user.Username + "!",

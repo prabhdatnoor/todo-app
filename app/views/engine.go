@@ -7,6 +7,7 @@ import (
 	"main/app/auth"
 	"main/app/database"
 	"main/app/models"
+	"main/app/utils"
 )
 
 var (
@@ -37,8 +38,102 @@ func RenderUser(c *fiber.Ctx) error {
 
 	username := goodCreds.Username
 
+	tasks = []models.Task{
+		{
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		},
+		{
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		},
+		{
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		},
+		{
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		},
+		{
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		},
+		{
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		},
+		{
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		},
+		{
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		},
+		{
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		}, {
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		}, {
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		}, {
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		},
+		{
+			Assignee:    12,
+			Creator:     9,
+			Description: "this is a task",
+			Status:      "almost done",
+			Name:        "My task",
+		},
+	}
+
 	return c.Render(
 		"home", fiber.Map{
 			"Username": username,
-			"Role":     role})
+			"Pfp":      utils.GetPfp(username),
+			"Role":     role,
+			"Tasks":    tasks,
+		})
 }
