@@ -15,6 +15,7 @@ services:
       - REDIS_PORT=6379
       - ROOT_PATH="/"
       - LOC=DEBUG
+      - PFPS=/static/pfps/
       - PORT=5001
     ports:
       - 5001:5001

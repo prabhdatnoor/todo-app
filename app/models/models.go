@@ -40,4 +40,5 @@ type StoreVal struct {
 	IsAdmin  bool
 	Username string
 	ID       uint
+	Pfp      string
 }
