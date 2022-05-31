@@ -6,13 +6,12 @@ import (
 	. "main/app/cache"
 	"main/app/controllers"
 	. "main/app/database"
+	"main/app/views"
 	"time"
 
 	"fmt"
-	"main/app/models"
 	"os"
 
-	"encoding/json"
 	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -32,7 +31,8 @@ func main() {
 		panic("can't connect to Redis")
 	}
 
-	app := fiber.New()
+	views.SetupEngine()
+	app := fiber.New(fiber.Config{Views: views.Engine})
 	app.Use(logger.New(logger.Config{
 		Format:       "[${time}] ${status} - ${latency} ${method} ${path}\n",
 		TimeZone:     "America/New_York",
@@ -57,45 +57,9 @@ func main() {
 		//for some reason, it doesnt want to use it
 	)
 
-	app.Post("/logout", auth.Logout)
+	app.Get("/logout", auth.Logout)
 	app.Post("/login", auth.Login)
 	app.Post("/register", auth.Register)
-	//app.Post("/verifySess", auth.VerifySessf)
-
-	app.Get("/users/info/:username", func(c *fiber.Ctx) error {
-		var user models.User
-		var tasks []models.Task
-
-		if c.Params("username") == "" {
-			fmt.Print(err)
-			return c.Status(400).SendString("No userID provided!")
-		}
-
-		err := Db.First(&user, "Username = ?", c.Params("username"))
-		if err != nil {
-			fmt.Print(err)
-			return c.Status(400).SendString("error in finding user")
-		}
-
-		err = Db.Select("Id").Limit(-1).Find(&tasks, "Username = ?", c.Params("username"))
-		if err != nil {
-			fmt.Print(err)
-			return c.Status(400).SendString("error in finding user in tasks table")
-		}
-
-		data := map[string]interface{}{
-			"pfp":   user.Pfp,
-			"tasks": tasks,
-			"id":    user.ID,
-		}
-
-		out, erro := json.Marshal(data)
-		if erro != nil {
-			fmt.Print(erro)
-			return c.Status(500).SendString("error in stringifying")
-		}
-		return c.SendString(string(out))
-	})
 
 	app.Post("/tasks", controllers.CreateTask)
 
@@ -106,14 +70,9 @@ func main() {
 	app.Delete("/tasks", controllers.DeleteTask)
 
 	app.Static("/", "./static/public")
+	app.Static("/pfps", "./static/pfps")
 
-	app.Get("/home", func(c *fiber.Ctx) error {
-		deets, err := auth.VerifySess(c)
-		if deets.Username != "guest" || err == nil {
-			return c.SendFile("./static/home.html")
-		}
-		return c.SendFile("./static/public/forbidden.html")
-	})
+	app.Get("/home", views.RenderUser)
 
 	if app.Listen(":"+os.Getenv("PORT")) != nil {
 		fmt.Print("app listening ERROR!")

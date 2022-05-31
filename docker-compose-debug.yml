@@ -33,6 +33,7 @@ services:
       - ./go.mod:/app/go.mod:ro
       - ./go.sum:/app/go.sum:ro
       - ./static:/app/static:ro
+      - ./resources:/app/resources:ro
     networks:
       - public
       - private

@@ -1,8 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Title</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
     <script src="https://unpkg.com/alpinejs" defer></script>
 </head>
@@ -12,9 +11,9 @@
         <div class ="col-3">
             <div class = "card">
                 <div class ="card-body text-center">
-                    <h3 class="y-3">Hello, Hardeep</h3>
-                    <h5 style="color:gray">Role</h5>
-                    <img alt="avatar" src="/static/pfps/guest.jpeg" width="20%">
+                    <h3 class="y-3">Hello, {{ .Username}}</h3>
+                    <h5 style="color:gray">{{ .Role}}</h5>
+                    <img alt="avatar" src="/pfps/guest.jpeg" width="20%">
                 </div>
             </div>
         </div>
@@ -25,4 +24,3 @@
     </div>
 </div>
 </body>
-</html>

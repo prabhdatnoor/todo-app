@@ -127,8 +127,22 @@ func VerifyUser(uname, password string) (uint, bool, error) {
 func Login(c *fiber.Ctx) error {
 	var user models.User
 	if err := c.BodyParser(&user); err != nil {
-		fmt.Print(err)
+		goodCreds, erro := VerifySess(c)
+
+		if goodCreds.Username != "guest" && erro == nil {
+			return c.Status(fiber.StatusOK).JSON(fiber.Map{
+				"User": fiber.Map{
+					"username": goodCreds.Username,
+					"id":       goodCreds.ID,
+				},
+				"success": true,
+				"message": "Content de te revoir, " + goodCreds.Username + "!",
+			})
+		}
+
+		fmt.Print(erro)
 		return c.Status(fiber.StatusInternalServerError).SendString("server failure in login")
+
 	}
 
 	id, match, err := VerifyUser(user.Username, user.Password)
