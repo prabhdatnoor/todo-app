@@ -8,7 +8,8 @@ RUN apk update \
     build-base \
     ca-certificates \
     git npm \
-    && update-ca-certificates
+    && update-ca-certificates \
+RUN apk add --no-cache bash
 
 ### Development with hot reload and debugger
 FROM base AS dev

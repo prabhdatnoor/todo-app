@@ -4,8 +4,9 @@ go 1.18
 
 require (
 	github.com/alexedwards/argon2id v0.0.0-20211130144151-3585854a6387
-	github.com/gofiber/fiber/v2 v2.33.0
+	github.com/gofiber/fiber/v2 v2.34.0
 	github.com/gofiber/storage/redis v0.0.0-20220518112136-6fd94ebd5acd
+	github.com/gofiber/template v1.6.28
 	gorm.io/driver/postgres v1.3.5
 	gorm.io/gorm v1.23.5
 )
@@ -27,7 +28,7 @@ require (
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/klauspost/compress v1.15.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.35.0 // indirect
+	github.com/valyala/fasthttp v1.37.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
