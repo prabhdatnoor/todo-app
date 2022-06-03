@@ -59,7 +59,7 @@ func main() {
 
 	app.Get("/logout", auth.Logout)
 	app.Post("/login", auth.Login)
-	app.Post("/register", auth.Register)
+	app.Post("/api/register", auth.Register)
 
 	app.Post("/tasks", controllers.CreateTask)
 
@@ -71,6 +71,7 @@ func main() {
 
 	app.Static("/", "./static/public")
 	app.Static("/pfps", "./static/pfps")
+	app.Static("/register", "./static/public/register.html")
 
 	app.Get("/home", views.RenderUser)
 

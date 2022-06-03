@@ -20,7 +20,7 @@ type Task struct {
 	Creator     uint `gorm:"foreignKey:users_Username"`
 	Description string
 	Name        string
-	Status      string
+	Status      int
 }
 
 type Search struct {
