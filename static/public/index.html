@@ -64,8 +64,10 @@
         </div>
     </div>
 
-
-    <button type="button" onclick="Login()" class="btn btn-primary"> Submit </button>
+    <div class="d-inline">
+    <button type="button" onclick="Login()" class="btn btn-primary"> Login </button>
+        <button id="register" onclick="location.href = '/register';" type="button" class="btn btn-primary bg-info"> Register </button>
+    </div>
     <p id="login-status">Login Failed</p>
 </form>
 </div>
@@ -83,6 +85,8 @@
             password.type = "text"
         } else password.type = "password"
     }
+
+
 
 
 

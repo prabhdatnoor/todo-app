@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <script src="https://unpkg.com/alpinejs" defer></script>
+</head>
+<body>
+<div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-xl-10">
+            <div class="card rounded-3 text-black"  >
+                <div class="card-body p-md-5 mx-md-4">
+                    <form id="holder">
+                        <div class="form-outline mb-4">
+                            <label class="form-label" for="username">Username</label>
+                            <input type="email" id="username" class="form-control"
+                                   placeholder="Username" />
+
+                        </div>
+
+                        <div class = "form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" placeholder="Password">
+                        </div>
+
+                        <div class = "form-group">
+                            <label for="password-confirm">Password</label>
+                            <input type="password" class="form-control" id="password-confirm" placeholder="Password">
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-10">
+                                <div class="form-check" >
+                                    <input onclick="togglePassword()" class="form-check-input" type="checkbox" id="show-password">
+                                    <label class="form-check-label" for="show-password" id="show-password-label">
+                                        Show Password
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-inline">
+                            <button id="register" onclick="Register()" type="button" class="btn btn-primary bg-info"> Register </button>
+                        </div>
+                        <p id="login-status" class="d-none bg-danger text-white">Login Failed</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function togglePassword(){
+        const password  = document.getElementById("password")
+        const password2  = document.getElementById("password-confirm")
+        if (password.type === "password"){
+            password.type = "text"
+            password2.type="text"
+        } else {
+            password.type = "password"
+            password2.type="password"
+        }
+    }
+
+
+
+    async function VerifyPassword(p1,p2) {
+        try {
+            if ((p1==="") || (p1 !== p2)) {
+                throw new Error("passwords don't match");
+                return false;
+            }
+            return true;
+        } catch (e) {
+            console.error(e);
+            const loginStatus = document.getElementById("login-status");
+            loginStatus.className = "d-block"
+            loginStatus.innerText = "Passwords don't match!"
+
+        }
+    }
+
+
+    async function Register(){
+        const loginStatus = document.getElementById("login-status");
+        try{
+            const Password = document.getElementById('password').value;
+            const Username = document.getElementById('username').value;
+            const verify = await VerifyPassword(Password, document.getElementById('password-confirm').value);
+            if (verify){
+                loginStatus.className="d-none";
+                const response = await fetch("/api/register", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Password,
+                        Username
+                    })
+
+                });
+
+                const json = await response.json();
+
+                if (json["success"] === true) {
+                    loginStatus.style.display = "none"
+                    window.alert("account created successfully")
+                    window.location.replace('/')
+
+                } else throw new Error(json["message"])
+            }
+        }
+        catch (err) {
+            loginStatus.style.display = "block"
+            loginStatus.innerText = err.message
+
+            console.error(err)
+        }
+    }
+</script>
+
+</body>
+</html>

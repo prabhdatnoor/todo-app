@@ -3,9 +3,11 @@ package auth
 import (
 	"encoding/json"
 	_ "encoding/json"
+	"errors"
 	"fmt"
 	"github.com/alexedwards/argon2id"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"main/app/cache"
 	"main/app/database"
@@ -104,7 +106,7 @@ func VerifyUser(uname, password string) (uint, bool, error) {
 
 	err := database.Db.Table("users").Where("username = ?", uname).Find(&pid).Count(&count).Error
 	//fmt.Print(db.Session(&gorm.Session{DryRun: true}).Model(&user).Select("password, id").Where("username = ?", uname).Find(&user).Statement.SQL.String())
-	if err != nil {
+	if err != nil || count == 0 {
 		passhash = Def_passhash
 		fmt.Print(err)
 	} else {
@@ -118,6 +120,9 @@ func VerifyUser(uname, password string) (uint, bool, error) {
 	match, erro := argon2id.ComparePasswordAndHash(password, passhash)
 	if erro != nil {
 		fmt.Print(erro)
+		if count == 0 {
+			return 0, false, gorm.ErrRecordNotFound
+		}
 		return 0, false, erro
 	}
 
@@ -150,6 +155,12 @@ func Login(c *fiber.Ctx) error {
 
 	if !match {
 		fmt.Print(err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"success": true,
+				"message": "username doesn't exist",
+			})
+		}
 		return c.Status(fiber.StatusForbidden).SendString("failure")
 	}
 
@@ -207,24 +218,49 @@ func Register(c *fiber.Ctx) error {
 	var user models.User
 	if err := c.BodyParser(&user); err != nil {
 		fmt.Print(err)
-		return c.SendStatus(500)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"User": fiber.Map{
+				"username": user.Username,
+			},
+			"success": false,
+			"message": "Error in parsing body, likely bad request",
+		})
 	}
 
 	if user.Password == "guest" {
-		return c.Status(fiber.StatusBadRequest).SendString(`Can't use "guest" as password`)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"User": fiber.Map{
+				"username": user.Username,
+			},
+			"success": false,
+			"message": "Can't use guest as password!",
+		})
 	}
 
 	hash, err := argon2id.CreateHash(user.Password, argon2id.DefaultParams)
 	if err != nil {
 		fmt.Print(err)
-		return c.SendStatus(500)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"User": fiber.Map{
+				"username": user.Username,
+			},
+			"success": false,
+			"message": "Error in password hashing",
+		})
 	}
 
 	user.Password = hash
 
-	if erro := database.Db.Clauses(clause.Returning{Columns: []clause.Column{{Name: "id"}}}).Create(&user); err != nil {
+	if erro := database.Db.Clauses(clause.Returning{Columns: []clause.Column{{Name: "id"}}}).Create(&user).Error; erro != nil {
 		fmt.Print(erro)
-		return c.SendStatus(500)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"User": fiber.Map{
+				"username": user.Username,
+				"id":       user.ID,
+			},
+			"success": false,
+			"message": "Username already exists or invalid",
+		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
