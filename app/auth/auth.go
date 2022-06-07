@@ -40,40 +40,52 @@ type isAdmin struct {
 	isAdmin bool
 }
 
-func CheckAuth(c *fiber.Ctx, taskID uint, r rune) (bool, error) {
+func CheckAuth(c *fiber.Ctx, taskID uint, r rune) (models.AuthCheck, error) {
+	var auth models.AuthCheck
 
 	deets, err := VerifySess(c)
+	auth.Creds = deets
+
 	if err != nil {
-		return false, err
+		auth.Success = false
+		return auth, err
 	}
 
 	if deets.Username == "guest" {
-		return false, nil
+		auth.Success = false
+		return auth, nil
 	}
 
 	var is isAdmin
 	if erro := database.Db.Table("users").Where("username=?", deets.Username).Find(&is).Error; erro != nil {
-		return false, erro
+		auth.Success = false
+		return auth, erro
 	}
 
 	if is.isAdmin {
-		return true, nil
+		auth.Success = false
+		return auth, nil
 	}
 	var count int64
 
 	if erro := database.Db.Table("tasks").Where("creator=?", deets.ID).Where("id=?", taskID).Count(&count).Error; err != nil {
-		return false, erro
+		auth.Success = false
+		return auth, erro
 	}
 
 	if count > 0 {
-		return true, nil
+		auth.Success = true
+		return auth, nil
 	}
 
 	if r == 'r' {
-		return true, nil
+		auth.Success = true
+		return auth, nil
 	}
 
-	return false, nil
+	auth.Success = false
+
+	return auth, nil
 
 }
 
