@@ -257,6 +257,18 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
+	firstChar := []rune(user.Username[0:1])[0]
+	isLetter := unicode.IsLetter(firstChar)
+	if user.Username == "guest" || !isLetter {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"User": fiber.Map{
+				"username": user.Username,
+			},
+			"success": false,
+			"message": `Can't use 'guest' as username and username must start with an alphabet`,
+		})
+	}
+
 	if err := CreateUser(&user); err != nil {
 		if errors.Is(err, fiber.ErrInternalServerError) {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -276,18 +288,6 @@ func Register(c *fiber.Ctx) error {
 			"message": "Username already exists or invalid",
 		})
 
-	}
-
-	firstChar := []rune(user.Username[0:1])[0]
-	isLetter := unicode.IsLetter(firstChar)
-	if user.Username == "guest" || !isLetter {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"User": fiber.Map{
-				"username": user.Username,
-			},
-			"success": false,
-			"message": `Can't use 'guest' as username and username must start with an alphabet`,
-		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{

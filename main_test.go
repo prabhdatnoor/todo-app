@@ -92,9 +92,6 @@ func setup() {
 
 	app.Get("/home", views.RenderUser)
 
-	if app.Listen(":"+os.Getenv("PORT")) != nil {
-		fmt.Print("app listening ERROR!")
-	}
 	passPlain, err := utils.GenSalt(12)
 	if err != nil {
 		panic(err)
