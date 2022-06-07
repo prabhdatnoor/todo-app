@@ -13,7 +13,7 @@ services:
       - DATABASE_PORT=5432
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - ROOT_PATH="/"
+      - ROOT_PATH="/app"
       - LOC=DEBUG
       - PFPS=/static/pfps/
       - PORT=5001
@@ -24,12 +24,7 @@ services:
    # secrets:
    #   - db_password
     volumes:
-      - ./app:/app:ro
-      - ./routes:/routes:ro
-      - ./main.go:/main.go:ro
-      - ./go.mod:/go.mod:ro
-      - ./go.sum:/go.sum:ro
-      - ./static:/static:ro
+      - .:/app
     networks:
       - public
       - private

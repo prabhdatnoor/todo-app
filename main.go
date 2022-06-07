@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"main/app/auth"
-	. "main/app/cache"
-	"main/app/controllers"
-	. "main/app/database"
-	"main/app/views"
+	"github.com/prabhdatnoor/todo-app/app/auth"
+	. "github.com/prabhdatnoor/todo-app/app/cache"
+	"github.com/prabhdatnoor/todo-app/app/controllers"
+	. "github.com/prabhdatnoor/todo-app/app/database"
+	"github.com/prabhdatnoor/todo-app/app/views"
 	"time"
 
 	"fmt"

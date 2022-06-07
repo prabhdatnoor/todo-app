@@ -3,10 +3,10 @@ package controllers
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/prabhdatnoor/todo-app/app/auth"
+	"github.com/prabhdatnoor/todo-app/app/database"
+	"github.com/prabhdatnoor/todo-app/app/models"
 	"gorm.io/gorm"
-	"main/app/auth"
-	"main/app/database"
-	"main/app/models"
 	"strconv"
 )
 

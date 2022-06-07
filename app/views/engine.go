@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html"
-	"main/app/auth"
-	"main/app/controllers"
-	"main/app/database"
-	"main/app/models"
-	"main/app/utils"
+	"github.com/prabhdatnoor/todo-app/app/auth"
+	"github.com/prabhdatnoor/todo-app/app/controllers"
+	"github.com/prabhdatnoor/todo-app/app/database"
+	"github.com/prabhdatnoor/todo-app/app/models"
+	"github.com/prabhdatnoor/todo-app/app/utils"
 )
 
 var (
