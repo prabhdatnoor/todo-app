@@ -72,6 +72,8 @@ func main() {
 	app.Static("/", "./static/public")
 	app.Static("/pfps", "./static/pfps")
 	app.Static("/register", "./static/public/register.html")
+	app.Get("/task/:id/edit", views.RenderEditTask)
+	app.Get("/task/:id", views.RenderTask)
 
 	app.Get("/home", views.RenderUser)
 

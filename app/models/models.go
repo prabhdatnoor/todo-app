@@ -2,16 +2,15 @@ package models
 
 import (
 	"gorm.io/gorm"
-	"time"
 )
 
 type User struct {
 	gorm.Model
-	Username  string `gorm:"unique"`
-	Pfp       string
-	Password  string
-	IsAdmin   bool      `gorm:"default:false"`
-	LastLogin time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	Username string `gorm:"unique"`
+	Pfp      string
+	Password string
+	IsAdmin  bool   `gorm:"default:false"`
+	Tasks    []Task `gorm:"many2many:user_languages;"`
 }
 
 type Task struct {
@@ -19,7 +18,15 @@ type Task struct {
 	Assignee    uint `gorm:"foreignKey:users_Username"`
 	Creator     uint `gorm:"foreignKey:users_Username"`
 	Description string
-	Name        string
+	Name        string `gorm:"unique"`
+	Status      int
+}
+
+type TaskSave struct {
+	gorm.Model
+	Assignee    uint `gorm:"foreignKey:users_Username"`
+	Description string
+	Name        string `gorm:"unique"`
 	Status      int
 }
 
@@ -41,4 +48,9 @@ type StoreVal struct {
 	Username string
 	ID       uint
 	Pfp      string
+}
+
+type AuthCheck struct {
+	Creds   StoreVal
+	Success bool
 }

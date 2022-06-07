@@ -1,17 +1,19 @@
-
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+          integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
     <script src="https://unpkg.com/alpinejs" defer></script>
 </head>
+<script>var status;</script>
 
 <body>
-<div class = "container-fluid">
-    <div class ="row">
+<div class="container-fluid">
+    <div class="row">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100%">
             <a class="navbar-brand" href="/home">TODO</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -20,28 +22,38 @@
                     <li class="nav-item active">
                         <a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="task/new/edit">New Task</a>
+                    </li>
                 </ul>
             </div>
-            <div class = "d-flex flex-row-reverse">
-                <ul class = "navbar-nav">
 
-                <li class = "nav-item m-1"> <p class="text-light">{{ .Username }}</p> </li>
-                    <li class="nav-item"><img class= "rounded-circle" src = {{ .Pfp }} width="40px"></li>
+            <div class="d-flex flex-row-reverse">
+                <ul class="navbar-nav">
+
+                    <li class="nav-item m-1"><p class="text-light">{{ .Username }}</p></li>
+                    <li class="nav-item"><img class="rounded-circle" src={{ .Pfp }} width="40px"></li>
                 </ul>
-        </div>
+            </div>
 
         </nav>
-        <div class ="col-9">
+        <div class="col-9">
             <h1> Your Tasks</h1>
             {{ range .Tasks }}
-            <div class = "container-fluid overflow-auto">
-                <div class = "card mb-2">
+            <div class="container-fluid overflow-auto">
+                <div class="card mb-2">
+                    {{ if .Status }}
                     <div class="progress m-1">
-                    <div class="progress-bar" role="progressbar" style="width: {{ .Status }}%;" aria-valuenow="{{ .Status }}" aria-valuemin="0" aria-valuemax="100">
-                        <h6 class="m-1">{{ .Name }}</h6>
+                        <div class="progress-bar" role="progressbar" style="width: {{ .Status }}%;"
+                             aria-valuenow="{{ .Status }}" aria-valuemin="0" aria-valuemax="100">
+                            <h6 class="m-1">{{ .Name }}</h6>
+                        </div>
                     </div>
-                </div>
-                    <h6 class="d-inline">Assignee: {{ .Assignee }}, Creator: {{ .Creator }}, Status: {{ .Status }}</h6>
+                    {{ else }}
+                    <div class="bg-danger text-center m-2 p-0 rounded"><h6 class = "text-white">{{.Name}}</h6></div>
+
+                    {{ end }}
+                    <h6 class="d-inline">Assignee: {{ .Assignee }}, Creator: {{ .Creator }}, Status: {{ .Status }}%</h6>
                     <h6 class="d-inline my-inline">Description:</h6> {{ .Description }}
                 </div>
             </div>
