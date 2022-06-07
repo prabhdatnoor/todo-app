@@ -130,9 +130,6 @@ func RenderEditTask(c *fiber.Ctx) error {
 	if goodCreds.IsAdmin {
 		role = "Admin"
 	}
-	f := c.AllParams()
-
-	fmt.Print(f)
 
 	if c.Params("id") == "new" {
 		return c.Render(
