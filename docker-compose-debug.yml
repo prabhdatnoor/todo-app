@@ -28,13 +28,7 @@ services:
    # secrets:
    #   - db_password
     volumes:
-      - ./app:/app/app:ro
-      - ./routes:/app/routes:ro
-      - ./main.go:/app/main.go:ro
-      - ./go.mod:/app/go.mod:ro
-      - ./go.sum:/app/go.sum:ro
-      - ./static:/app/static:ro
-      - ./resources:/app/resources:ro
+      - .:/app
     networks:
       - public
       - private

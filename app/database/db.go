@@ -2,9 +2,9 @@ package database
 
 import (
 	"fmt"
+	"github.com/prabhdatnoor/todo-app/app/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"main/app/models"
 	"os"
 )
 

@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"github.com/alexedwards/argon2id"
 	"github.com/gofiber/fiber/v2"
+	"github.com/prabhdatnoor/todo-app/app/cache"
+	"github.com/prabhdatnoor/todo-app/app/database"
+	"github.com/prabhdatnoor/todo-app/app/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"main/app/cache"
-	"main/app/database"
-	"main/app/models"
+	"unicode"
 )
 
 type APIUser struct {
@@ -32,7 +33,7 @@ func Bool2String(b bool) string {
 }
 func StoreVal2Json(user *models.User) string {
 	fmt.Print(user)
-	return "{Username:" + user.Username + ", IsAdmin:" + Bool2String(user.IsAdmin) + ", ID:" + string(user.ID) + "}"
+	return "{Username:" + user.Username + ", IsAdmin:" + Bool2String(user.IsAdmin) + ", ID:" + fmt.Sprint(user.ID) + "}"
 
 }
 
@@ -226,6 +227,23 @@ func Logout(c *fiber.Ctx) error {
 	})
 }
 
+func CreateUser(user *models.User) error {
+	hash, err := argon2id.CreateHash(user.Password, argon2id.DefaultParams)
+	if err != nil {
+		fmt.Print(err)
+		return fiber.ErrInternalServerError
+
+	}
+
+	user.Password = hash
+
+	if err := database.Db.Clauses(clause.Returning{Columns: []clause.Column{{Name: "id"}}}).Create(user).Error; err != nil {
+		fmt.Print(err)
+		return fiber.ErrBadRequest
+	}
+	return nil
+}
+
 func Register(c *fiber.Ctx) error {
 	var user models.User
 	if err := c.BodyParser(&user); err != nil {
@@ -239,32 +257,16 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
-	if user.Password == "guest" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"User": fiber.Map{
-				"username": user.Username,
-			},
-			"success": false,
-			"message": "Can't use guest as password!",
-		})
-	}
-
-	hash, err := argon2id.CreateHash(user.Password, argon2id.DefaultParams)
-	if err != nil {
-		fmt.Print(err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"User": fiber.Map{
-				"username": user.Username,
-			},
-			"success": false,
-			"message": "Error in password hashing",
-		})
-	}
-
-	user.Password = hash
-
-	if erro := database.Db.Clauses(clause.Returning{Columns: []clause.Column{{Name: "id"}}}).Create(&user).Error; erro != nil {
-		fmt.Print(erro)
+	if err := CreateUser(&user); err != nil {
+		if errors.Is(err, fiber.ErrInternalServerError) {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"User": fiber.Map{
+					"username": user.Username,
+				},
+				"success": false,
+				"message": "Error in password hashing",
+			})
+		}
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"User": fiber.Map{
 				"username": user.Username,
@@ -272,6 +274,19 @@ func Register(c *fiber.Ctx) error {
 			},
 			"success": false,
 			"message": "Username already exists or invalid",
+		})
+
+	}
+
+	firstChar := []rune(user.Username[0:1])[0]
+	isLetter := unicode.IsLetter(firstChar)
+	if user.Username == "guest" || !isLetter {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"User": fiber.Map{
+				"username": user.Username,
+			},
+			"success": false,
+			"message": `Can't use 'guest' as username and username must start with an alphabet`,
 		})
 	}
 
